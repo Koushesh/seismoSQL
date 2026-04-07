@@ -1,0 +1,83 @@
+-- 6. Create Funktion
+
+-- generating a function to sort (order) places by distance to an assumed eruption point in the east Eifel volcanic field
+
+-- function which takes an place ID and returns the latitude of the place
+CREATE OR ALTER FUNCTION takePlacIdReturnPlaceLat
+(@placid INT)
+RETURNS float
+AS
+BEGIN
+    DECLARE @latEruptionPoint float;
+    SELECT @latEruptionPoint = Lat 
+    FROM t_remarkablePlaces
+    WHERE placid = @placid;
+    RETURN @latEruptionPoint 
+END;
+GO
+-- function which takes an place ID and returns the longitude of the place
+CREATE OR ALTER FUNCTION takePlacIdReturnPlaceLon
+(@placid INT)
+RETURNS float
+AS
+BEGIN
+    DECLARE @lonEruptionPoint float;
+    SELECT  @lonEruptionPoint = Lon
+    FROM t_remarkablePlaces
+    WHERE placid = @placid;
+    RETURN @lonEruptionPoint 
+END;
+GO
+-- function which calculates the distances between each place in the table and the assumed eruption point (input)
+CREATE OR ALTER FUNCTION nearestPlacesToEruptionPoint
+(@latEruptionPoint float, @lonEruptionPoint float)
+RETURNS TABLE
+AS
+RETURN
+(SELECT 
+	placid,placName,
+	ROUND(geography::Point(lat,lon,4326).STDistance(geography::Point(@latEruptionPoint,@lonEruptionPoint,4326)) / 1000.0, 2) AS DistanceToEruptionPoint_km
+FROM t_remarkablePlaces);
+GO
+
+-- a nesting function to see the places sorted by distance to the assumed eruption point (e.g.: place ID = 1)
+-- give a place ID: 1, 2 or 3 to see the nearest places to it
+-- place ID = 1 = Laacher See volcano
+-- place ID = 2 = Magmatic activity epicenter main
+-- place ID = 3 = Magmatic activity epicenter east
+
+-- eruption center 1
+DECLARE @lat FLOAT = dbo.takePlacIdReturnPlaceLat(1);
+DECLARE @lon FLOAT = dbo.takePlacIdReturnPlaceLon(1);
+INSERT INTO t_remarkablePlacesCloseToeruptionCenter1 (placid, placName, distanceToEruptionPoint_km)
+SELECT placid, placName, DistanceToEruptionPoint_km
+FROM dbo.nearestPlacesToEruptionPoint(@lat, @lon);
+
+-- eruption center 2
+DECLARE @lat FLOAT = dbo.takePlacIdReturnPlaceLat(2);
+DECLARE @lon FLOAT = dbo.takePlacIdReturnPlaceLon(2);
+INSERT INTO t_remarkablePlacesCloseToeruptionCenter2 (placid, placName, distanceToEruptionPoint_km)
+SELECT placid, placName, DistanceToEruptionPoint_km
+FROM dbo.nearestPlacesToEruptionPoint(@lat, @lon);
+
+-- eruption center 3
+DECLARE @lat FLOAT = dbo.takePlacIdReturnPlaceLat(3);
+DECLARE @lon FLOAT = dbo.takePlacIdReturnPlaceLon(3);
+INSERT INTO t_remarkablePlacesCloseToeruptionCenter3 (placid, placName, distanceToEruptionPoint_km)
+SELECT placid, placName, DistanceToEruptionPoint_km
+FROM dbo.nearestPlacesToEruptionPoint(@lat, @lon);
+
+-- View
+CREATE OR ALTER VIEW v_remarkablePlacesCloseToEruptionCenter123 AS
+SELECT 
+    center1.placid,
+    center1.placName AS placeName,
+    center1.distanceToEruptionPoint_km AS distanceToCenter1_km,
+    center2.distanceToEruptionPoint_km AS distanceToCenter2_km,
+    center3.distanceToEruptionPoint_km AS distanceToCenter3_km
+FROM t_remarkablePlacesCloseToeruptionCenter1 center1
+JOIN t_remarkablePlacesCloseToeruptionCenter2 center2 ON center1.placid = center2.placid
+JOIN t_remarkablePlacesCloseToeruptionCenter3 center3 ON center1.placid = center3.placid;
+
+SELECT * FROM v_remarkablePlacesCloseToEruptionCenter123
+--order by distanceToCenter1_km , distanceToCenter2_km, distanceToCenter3_km
