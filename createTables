@@ -1,0 +1,118 @@
+-- 1. Creating Tables of data
+
+--+ for events (earthquakes) and their properties 
+CREATE TABLE t_events(
+	--evQua char(1) Null, -- quality of picking on event
+	evid int IDENTITY(1,1) PRIMARY KEY NOT NULL, -- event ID
+	date date NULL, -- date of event occurrence
+	time time(3) NULL, -- origin time of event occurrence
+	Lat float NULL, -- Latitude of event
+	Lon float NULL, -- Longitude of event
+	depth float NULL, -- depth of event
+	latEr float NULL, -- location error in Lat. direction
+	lonEr float NULL, -- location error in Lon. direction
+	depEr float NULL, -- location error in depth direction
+	angGap int null, -- angular gap while picking and localization process
+	picEr float NULL, -- average time error in s in picking phases
+	--FOREIGN KEY (evQua) REFERENCES t_eventQuality(evQua)
+) 
+GO 
+-- drop table t_events
+
+--+ for additional info on events quality 
+CREATE TABLE t_eventsQuality(
+	evQua char(1) NOT NULL,  -- quality of picking on event
+	evid int identity(1,1) PRIMARY KEY  not null, -- event ID
+	nrPPic int null, -- number of picks of P-phase arrivals
+	nrSPic int null -- number of picks of S-phase arrivals
+	--FOREIGN KEY (evid) REFERENCES t_events(evid)
+) 
+GO
+-- drop table t_eventsQuality
+
+--+ for stations’ properties 
+CREATE TABLE t_stations(
+	stid int IDENTITY(1,1) PRIMARY KEY NOT NULL, -- station ID
+	stCod char(4) NULL, -- station code known for the seismological networks
+	stNet char(2) NULL, -- seismological network that ech station belongs to
+	Lat float Null, -- latitude of the location in which the sensor is installed
+	Lon float NUll, -- longitude of the location in which the sensor is installed
+	alti float NULL, --elevation (altitude) of the location in which the sensor is installed
+	eigenFrq float NULL, -- eigen frequency of the sensor 
+	onLin nvarchar(3) NULL, -- data transfering status online or offline
+	tempoPerm nvarchar(10) NULL, -- temporary or permanent location for station
+	instalDate date NULL, -- date of installation
+	agencName nvarchar(50) NULL -- the supporting agency
+) 
+GO
+-- drop table t_stations
+
+--+ for installations and services of the sensors (stations)
+CREATE TABLE t_stInstalService(
+	stid int IDENTITY(1,1) PRIMARY KEY NOT NULL, -- station ID
+	stCod char(4) NULL,-- station code
+	lastDateServ date NULL, -- latest service date
+	personFulName1 nvarchar(50) NULL, -- the person who installed the sensor
+	personFulName2 nvarchar(50) NULL, -- the assistant person while installation
+	sensorTyp nvarchar(30) null, -- sensor name (type)
+	GPSStatus nvarchar(3) null, -- if GPS works correctly
+	nrGPSSat int null, -- how many satellites are available at the time of installation
+	issues nvarchar(50) default 'no issues'
+) 
+GO
+-- drop table t_stInstalService
+
+--+ for owner of the sites that sensors are installed there and their contact infos
+CREATE TABLE t_ownerStationSite(
+	stid int IDENTITY(1,1) PRIMARY KEY NOT NULL, -- station ID
+	personFulName1 nvarchar(50) NULL, -- the first contact person 
+	personFulName2 nvarchar(50) NULL, -- the second contact person
+	email nvarchar(50) NULL, -- email 
+	tel nvarchar(30) NULL, -- telephon
+	fullAdress nvarchar(50) NULL, -- address to pick up the key of the site
+	issues nvarchar(50) default 'available on working days 8:00 - 16:00' -- any remarks write here 
+) 
+GO
+-- drop table t_ownerStationSite
+
+--+ for remarkable places (locations) around the east Eifel volcanic fields (Laacher See volcano Germany)
+CREATE TABLE t_remarkablePlaces(
+	placid int IDENTITY(1,1) PRIMARY KEY NOT NULL, -- place ID 
+	placName nvarchar(50) NULL, -- name of village/city/location
+	Lat float NULL, -- latitude 
+	Lon float NULL, -- longitude
+) 
+GO
+-- drop table t_remarkablePlaces
+
+--+ for remarkable places (locations) around the east Eifel volcanic fields (Laacher See volcano Germany):
+-- plus their distace to eruption center 1
+CREATE TABLE t_remarkablePlacesCloseToeruptionCenter1(
+	placid int PRIMARY KEY NOT NULL, -- place ID 
+	placName nvarchar(50) NULL, -- name of village/city/location
+	distanceToEruptionPoint_km float NULL, -- latitude 
+) 
+GO
+-- drop table t_remarkablePlacesCloseToeruptionCenter1
+
+-- plus their distace to eruption center 2
+CREATE TABLE t_remarkablePlacesCloseToeruptionCenter2(
+	placid int PRIMARY KEY NOT NULL, -- place ID 
+	placName nvarchar(50) NULL, -- name of village/city/location
+	distanceToEruptionPoint_km float NULL, -- latitude 
+) 
+GO
+-- drop table t_remarkablePlacesCloseToeruptionCenter2
+
+-- plus their distace to eruption center 3
+CREATE TABLE t_remarkablePlacesCloseToeruptionCenter3(
+	placid int PRIMARY KEY NOT NULL, -- place ID 
+	placName nvarchar(50) NULL, -- name of village/city/location
+	distanceToEruptionPoint_km float NULL, -- latitude 
+) 
+GO 
+
+
+-- drop table t_remarkablePlacesCloseToeruptionCenter3 
+
+
