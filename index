@@ -1,0 +1,52 @@
+-- 5. Create Index
+
+-- index to speed up the search (filter) criterion
+CREATE NONCLUSTERED INDEX idx_events ON t_events(Lon);
+SELECT * FROM t_events WHERE Lon > 7.35;
+
+-- some queries and updates  on tables -- 
+
+-- in t_events or t_eventsQuality there is already known that two cluster of events exist: 
+-- one include more activities (the main cluster), another one has less activity (the east cluster)
+-- the separation border for these clusters is the value of 7.35 as the longitude 
+
+-- in the following this criterion is used to separate these clusters 
+-- and also calculate the average of the locations of events in each cluster
+
+-- at the end of this part these averaged values are inserted 
+-- to their corresponding rows in the table t_remarkablePlaces
+
+-- declaration of tow sets of variables:
+DECLARE @latEast FLOAT, @lonEast FLOAT, @depthEast FLOAT;
+DECLARE @latMain FLOAT, @lonMain FLOAT, @depthMain FLOAT;
+-- applying the filter for: 
+-- the east cluster
+SELECT 
+    @latEast = AVG(Lat), 
+    @lonEast = AVG(Lon), 
+    @depthEast = AVG(depth)
+FROM t_events
+WHERE Lon > 7.35;
+-- for the main cluster
+SELECT 
+    @latMain = AVG(Lat), 
+    @lonMain = AVG(Lon), 
+    @depthMain = AVG(depth)
+FROM t_events
+WHERE Lon <= 7.35;
+-- Print the result
+PRINT 'East cluster activity center: Lat: ' 
+    + CHAR(13) + CHAR(10) -- to go to the next line
+    + LTRIM(STR(@latEast, 10, 4)) 	
+    + ' Lon: ' + LTRIM(STR(@lonEast, 10, 4)) 
+    + ' Depth: ' + LTRIM(STR(@depthEast, 10, 2));
+PRINT 'Main cluster activity center: Lat: ' 
+	+ CHAR(13) + CHAR(10) -- to go to the next line
+	+ LTRIM(STR(@latMain, 10, 4)) 	
+	+ ' Lon: ' + LTRIM(STR(@lonMain, 10, 4)) 
+	+ ' Depth: ' + LTRIM(STR(@depthMain, 10, 2));
+
+update t_remarkablePlaces set Lat = 50.3748, Lon = 7.3032 where placid = 2;
+update t_remarkablePlaces set Lat = 50.3928, Lon = 7.5014 where placid = 3;
+
+-- drop index idx_events on t_events; 
