@@ -1,0 +1,94 @@
+-- 8. Create View
+-- create simple views first
+create view v_events
+as 
+select * from t_events;
+
+SELECT * FROM v_events;
+--
+create view v_eventsQuality
+as 
+select * from t_eventsQuality;
+
+SELECT * FROM v_eventsQuality;
+--
+create view v_stations
+as 
+select * from t_stations;
+
+SELECT * FROM v_stations;
+--
+create view v_stInstalService
+as 
+select * from t_stInstalService;
+
+SELECT * FROM v_stInstalService;
+--
+create view v_ownerStationSite
+as 
+select * from t_ownerStationSite;
+
+SELECT * FROM v_ownerStationSite;
+--
+create view v_remarkablePlaces
+as 
+select * from t_remarkablePlaces;
+
+SELECT * FROM v_remarkablePlaces;
+
+-- create a view of merging data of the two tables t_events and t_eventsQuality 
+create view v_join_events_eventsQuality
+as 
+select
+    ev.evid,
+    ev.date,
+    ev.time,
+    ev.Lat,
+    ev.Lon,
+    ev.depth,
+    ev.latEr,
+    ev.lonEr,
+    ev.depEr,
+    ev.angGap,
+    ev.picEr,
+    evQu.evQua, 
+    evQu.nrPPic,
+    evQu.nrSPic
+from t_events ev
+join t_eventsQuality evQu on ev.evid = evQu.evid
+
+SELECT * FROM v_join_events_eventsQuality
+
+-- create a view of merging data of the three tables t_stations, t_stInstalService and t_ownerStationSite 
+create view v_join_stations_ownerStationSite_stInstalService
+as
+select 
+	st.stid,
+	st.stCod,
+	st.stNet,
+	st.Lat,
+	st.Lon,
+	st.alti,
+	st.eigenFrq,
+	st.onLin,
+	st.tempoPerm,
+	st.instalDate,
+	st.agencName,
+	inst.lastDateServ,
+	inst.personFulName1 as instalServic_person1,
+	inst.personFulName2 as instalServic_person2,
+	inst.sensorTyp,
+	inst.GPSStatus,
+	inst.nrGPSSat,
+	inst.issues as issues_on_instalService,
+	own.personFulName1 as owner_person1,
+	own.personFulName2 as owner_person2,
+	own.email,
+	own.tel,
+	own.fullAdress,
+	own.issues as accessablity
+from t_stations st
+join t_stInstalService inst on st.stid = inst.stid
+join t_ownerStationSite own on st.stid = own.stid
+
+SELECT * FROM v_join_stations_ownerStationSite_stInstalService
