@@ -1,0 +1,62 @@
+-- 3. Create Procedure
+
+
+-- a procedure to provide call/contact info of the owner person of the site that a station there is installed 
+--> one must give a station ID while executing the procedure
+CREATE OR ALTER PROCEDURE sp_join_stations_ownerStationSite
+    @stid INT,
+    @stCod CHAR(4) OUTPUT,
+    @Lat float OUTPUT,
+    @Lon float OUTPUT,
+    @personNam1 NVARCHAR(50) OUTPUT,
+    @personNam2 NVARCHAR(50) OUTPUT,
+    @tel NVARCHAR(30) OUTPUT,
+    @adress NVARCHAR(50) OUTPUT,
+    @issues NVARCHAR(50) OUTPUT
+AS
+BEGIN
+    SELECT 
+        @stCod = st.stCod,
+        @Lat = st.Lat,
+	 @Lon = st.Lon,
+        @personNam1 = ownSt.personFulName1,
+        @personNam2 = ownSt.personFulName2,
+        @tel = ownSt.tel,
+        @adress = ownSt.fullAdress,
+	 @issues = ownSt.issues
+    FROM t_stations AS st
+    JOIN t_ownerStationSite AS ownSt ON st.stid = ownSt.stid
+    WHERE st.stid = @stid;
+END;
+GO
+-- execute the procedure
+DECLARE 
+    @stCod CHAR(4),
+    @Lat float,
+    @Lon float,
+    @personNam1 NVARCHAR(50),
+    @personNam2 NVARCHAR(50),
+    @tel NVARCHAR(30),
+    @adress NVARCHAR(50),
+    @issues NVARCHAR(50);
+
+-- give the station ID (stid) to see the corresponding following declared query results 
+EXEC sp_join_stations_ownerStationSite
+    @stid = 1,  -- Replace 1 with the station ID you want
+    @stCod = @stCod OUTPUT,
+    @lat = @lat OUTPUT,
+    @lon = @lon OUTPUT,
+    @personNam1 = @personNam1 OUTPUT,
+    @personNam2 = @personNam2 OUTPUT,
+    @tel = @tel OUTPUT,
+    @adress = @adress OUTPUT,
+    @issues = @issues OUTPUT;
+SELECT 
+    @stCod AS stCod,
+    @lat as Lat,
+    @lon as Lon,
+    @personNam1 AS first_contact_person,
+    @personNam2 AS second_contact_person,
+    @tel AS tel,
+    @adress AS adress,
+    @issues as availiblity;
